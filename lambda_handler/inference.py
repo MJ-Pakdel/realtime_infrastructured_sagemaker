@@ -1,72 +1,43 @@
-# inference.py
+import os, json, boto3, logging
+from botocore.config import Config
 
-import os
-import json
-import boto3
-import logging
-
-# Configure logging - reduce logging in production
 logger = logging.getLogger()
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.WARNING)                     # INFO only in dev
 
-# Initialize SageMaker runtime client - create once at init time
-runtime = boto3.client('sagemaker-runtime')
+# Reuse connection + skip extra retries
+runtime = boto3.client(
+    "sagemaker-runtime",
+    config=Config(retries={"max_attempts": 0})
+)
 
-def handler(event, context):
-    """
-    Lambda handler function that receives requests from API Gateway
-    and forwards them to SageMaker endpoint.
-    """
+def handler(event, _):
+    # 1. Extract features safely
     try:
-        # Get the SageMaker endpoint name from environment variable
-        endpoint_name = os.environ['SAGEMAKER_ENDPOINT']
-        
-        # Parse the incoming request body - fast path
-        if 'body' in event:
-            body = json.loads(event['body'])
-            features = body.get('features', [])
-        else:
-            # Handle direct invocation case
-            features = event.get('features', [])
-        
-        # Create instances format expected by SageMaker endpoint
-        # Use JSON for better performance (avoids string parsing overhead)
-        payload = json.dumps({"instances": [features]})
-        
-        # Invoke SageMaker endpoint with JSON instead of CSV
-        response = runtime.invoke_endpoint(
-            EndpointName=endpoint_name,
-            ContentType='application/json',
-            Body=payload
-        )
-        
-        # Parse the prediction result
-        result = response['Body'].read().decode('utf-8')
-        
-        # Return successful response
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  # For CORS support
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type'
-            },
-            'body': json.dumps({
-                'prediction': result
-            })
-        }
-        
-    except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
-        # Return error response
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': str(e)
-            })
-        }
+        body = json.loads(event.get("body", "{}"))
+        features = body["features"]                 # KeyError → 400 later
+    except (json.JSONDecodeError, KeyError):
+        return {"statusCode": 400,
+                "body": json.dumps({"error": "Invalid payload"})}
+
+    # 2. Build CSV payload as bytes
+    csv_payload = (",".join(map(str, features))).encode()
+
+    # 3. Call SageMaker
+    resp = runtime.invoke_endpoint(
+        EndpointName=os.environ["SAGEMAKER_ENDPOINT"],
+        ContentType="text/csv",
+        Body=csv_payload,
+    )
+
+    # 4. Stream → str (tiny)
+    prediction = resp["Body"].read().decode()
+
+    # 5. Respond
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps(
+            {"features": features, "prediction": prediction},
+            separators=(",", ":")                   # lean JSON
+        ),
+    }

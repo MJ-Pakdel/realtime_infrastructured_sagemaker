@@ -14,12 +14,12 @@ sagemaker_image_uri = "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-sc
 # lambda_timeout = 60
 # lambda_memory = 256
 # New configuration for high throughput:
-lambda_timeout = 5  # Reduced timeout to fail fast - most requests should complete in ~300ms
-lambda_memory = 2048  # Increased memory for better CPU allocation and reduced cold starts
+lambda_timeout = 30  # Reduced timeout to fail fast
+lambda_memory = 1024  # Increased memory for better CPU allocation
 
 # SageMaker configuration
-# Updated to supported instance type - more powerful for lower latency:
-instance_type = "ml.c5.large"  # Better CPU performance than t2.medium
+# Updated to supported instance type:
+instance_type = "ml.t2.medium"
 instance_count = 1
 # New configuration for high throughput (commented out):
 # instance_type = "ml.c5.xlarge"  # More powerful CPU instance
