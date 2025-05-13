@@ -72,8 +72,9 @@ module "sagemaker" {
   name_prefix             = var.name_prefix
   instance_type           = var.instance_type
   instance_count          = var.instance_count
-  subnet_ids              = module.network.private_subnet_ids
-  security_group_id       = module.network.default_security_group_id
+  # VPC configuration removed - SageMaker endpoint now uses public internet
+  # subnet_ids              = module.network.private_subnet_ids
+  # security_group_id       = module.network.default_security_group_id
   sagemaker_role_arn      = module.iam.sagemaker_role_arn
   sagemaker_image_uri     = var.sagemaker_image_uri
   model_s3_path = var.model_s3_path

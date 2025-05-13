@@ -7,12 +7,13 @@ variable "instance_type" {
 variable "instance_count" {
   type = number
 }
-variable "subnet_ids" {
-  type = list(string)
-}
-variable "security_group_id" {
-  type = string
-}
+# VPC configuration removed - not needed when SageMaker is outside VPC
+# variable "subnet_ids" {
+#   type = list(string)
+# }
+# variable "security_group_id" {
+#   type = string
+# }
 variable "sagemaker_role_arn" {
   type = string
 }

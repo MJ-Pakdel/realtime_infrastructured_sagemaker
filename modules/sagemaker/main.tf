@@ -32,10 +32,11 @@ resource "aws_sagemaker_model" "model" {
     }
   }
 
-  vpc_config {
-    subnets            = var.subnet_ids
-    security_group_ids = [var.security_group_id]
-  }
+  # Removing VPC config to allow public internet access for package installation
+  # vpc_config {
+  #   subnets            = var.subnet_ids
+  #   security_group_ids = [var.security_group_id]
+  # }
 
   tags = merge(
     { Name = "${var.name_prefix}-model" },
