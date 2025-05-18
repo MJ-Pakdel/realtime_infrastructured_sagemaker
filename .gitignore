@@ -1,6 +1,30 @@
 # .gitignore
+
+# Terraform directories
 .terraform/
+.terragrunt-cache/
+
+# Terraform state files
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
+
+# Terraform lock file
 .terraform.lock.hcl
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Terraform variables and override files
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local .terraform directories
+**/.terraform/*
+
+# macOS
 .DS_Store

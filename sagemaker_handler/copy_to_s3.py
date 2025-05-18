@@ -12,8 +12,11 @@ tf_output = subprocess.check_output(["terraform", "output", "-json"]).decode("ut
 outputs = json.loads(tf_output)
 bucket_name = outputs["artifact_bucket_name"]["value"]
 
+# Get the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
 # File details
-local_file = os.path.join("sagemaker_handler", "model.tar.gz")
+local_file = os.path.join(script_dir, "model.tar.gz")
 s3_key = "model/model.tar.gz"
 
 # Upload file

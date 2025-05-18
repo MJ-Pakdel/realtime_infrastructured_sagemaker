@@ -21,7 +21,7 @@ terraform apply -auto-approve \
 
 # 5. Upload model to S3
 echo "📤 Uploading model to S3..."
-python copy_to_s3.py
+python sagemaker_handler/copy_to_s3.py
 
 # 6. Tag and push Docker image to ECR
 ECR_URI=$(terraform output -raw ecr_repository_url)
@@ -56,7 +56,7 @@ echo ""
 echo "📋 Infrastructure outputs:"
 terraform output
 
-# 9. Extract important endpoints
+# 8. Extract important endpoints
 API_URL=$(terraform output -raw api_gateway_url 2>/dev/null || echo "API not yet deployed")
 SAGEMAKER_ENDPOINT=$(terraform output -raw sagemaker_endpoint_name 2>/dev/null || echo "SageMaker endpoint not yet deployed")
 
