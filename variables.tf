@@ -112,3 +112,10 @@ variable "my_ip_cidr" {
   description = "Your laptop's public IP in CIDR form, e.g. 198.51.100.42/32"
   type        = string
 }
+
+
+variable "feature_group_name" {
+  description = "Name of the feature group for online store"
+  type        = string
+  default     = "real_time_features"
+}

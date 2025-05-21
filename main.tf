@@ -31,10 +31,11 @@ module "s3_artifact" {
 }
 
 module "iam" {
-  source      = "./modules/iam"
-  name_prefix = var.name_prefix
-  region      = var.region
-  tags        = var.tags
+  source            = "./modules/iam"
+  name_prefix       = var.name_prefix
+  region            = var.region
+  tags              = var.tags
+  feature_group_arn = module.feature_store.feature_group_arn
 }
 
 module "ecr" {
@@ -115,4 +116,13 @@ module "tester_ec2" {
   vpc_security_group_ids = [module.network.default_security_group_id]
   key_name               = ""  # no SSH key needed with SSM
   iam_instance_profile   = aws_iam_instance_profile.latency.name
+}
+
+module "feature_store" {
+  source             = "./modules/feature_store"
+  feature_group_name = "real_time_features"
+  record_id_name     = "user_id"
+  event_time_name    = "event_ts"
+  role_arn           = module.iam.sagemaker_role_arn
+  offline_s3_uri     = "s3://${module.s3_artifact.bucket_name}/feature-store/"
 }

@@ -1,10 +1,20 @@
 variable "name_prefix" {
-  type = string
+  description = "Prefix for resource names"
+  type        = string
 }
+
 variable "region" {
-  type = string
+  description = "AWS region"
+  type        = string
 }
+
 variable "tags" {
-  type = map(string)
-  default = {}
+  description = "Tags to apply to resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "feature_group_arn" {
+  description = "ARN of the SageMaker Feature Group"
+  type        = string
 }

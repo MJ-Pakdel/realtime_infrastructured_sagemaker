@@ -20,47 +20,10 @@ This repository contains Terraform infrastructure code for deploying a real-time
 - Terraform installed
 - Python 3.8+ for Lambda and SageMaker handlers
 
-## Quick Start
 
-1. Configure AWS credentials:
-```bash
-export AWS_PROFILE=your_profile
-```
-
-2. Deploy infrastructure:
-```bash
-./deploy_infra.sh
-```
-
-3. Destroy infrastructure:
-```bash
-./destroy_infra.sh
-```
-
-## Project Structure
-
-```
-.
-├── modules/
-│   ├── network/      # VPC and security groups
-│   ├── lambda/       # Lambda function configuration
-│   └── sagemaker/    # SageMaker endpoint configuration
-├── lambda_handler/   # Lambda function code
-├── sagemaker_handler/# SageMaker inference code
-├── deploy_infra.sh   # Deployment script
-└── destroy_infra.sh  # Cleanup script
-```
-
-# Realtime Inference with SageMaker
-
-This project sets up a real-time inference pipeline using AWS SageMaker, Lambda, and API Gateway.
 
 ## Latency Testing Instructions
 
-### Prerequisites
-1. AWS CLI configured with appropriate credentials
-2. Terraform installed
-3. Homebrew (for macOS users)
 
 ### Step-by-Step Guide
 
@@ -173,45 +136,3 @@ Run the latency test:
 ```bash
 python3 test_gateway.py --url YOUR_API_GATEWAY_URL
 ```
-
-#### 4. Understanding Test Results
-
-The script outputs latency measurements in milliseconds:
-- P10: Fastest 10% of requests
-- P50: Median latency
-- P90: 90% of requests are faster than this
-- P95: 95% of requests are faster than this
-- P99: 99% of requests are faster than this
-
-Example output:
-```
-Testing API Gateway: https://your-api-gateway-url/
-Warming up with 50 requests...
-
-Measuring latency over 100 requests...
-..........
-
-P10: 30.47 ms
-P50: 39.09 ms
-P90: 48.37 ms
-P95: 51.45 ms
-P99: 65.93 ms
-```
-
-#### 5. Cleanup
-
-Exit SSM session:
-```bash
-exit
-```
-
-(Optional) Destroy test infrastructure:
-```bash
-terraform destroy -target=module.tester_ec2
-```
-
-### Notes
-- The EC2 instance must have the SSM role attached (configured in Terraform)
-- Tests run from within AWS, so latencies will be better than from external clients
-- The script includes a warmup phase to ensure steady-state performance
-- You can modify the number of warmup requests and test requests by changing the parameters in the script 

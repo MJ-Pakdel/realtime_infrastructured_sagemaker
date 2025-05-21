@@ -81,8 +81,12 @@ resource "aws_iam_role_policy" "sagemaker_s3_access" {
         Effect   = "Allow",
         Action   = [
           "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
           "s3:ListBucket",
-          "s3:GetBucketLocation"
+          "s3:GetBucketLocation",
+          "s3:GetBucketAcl",
+          "s3:PutBucketAcl"
         ],
         Resource = [
           "arn:aws:s3:::${var.name_prefix}-lambda-bucket",
@@ -93,8 +97,52 @@ resource "aws_iam_role_policy" "sagemaker_s3_access" {
   })
 }
 
+# Add Feature Store permissions to SageMaker role
+resource "aws_iam_role_policy" "sagemaker_feature_store" {
+  name = "${var.name_prefix}-feature-store-access"
+  role = aws_iam_role.sagemaker.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:GetItem",
+          "dynamodb:BatchGetItem",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:DescribeTable"
+        ]
+        Resource = "*"  # This will be the DynamoDB tables created by Feature Store
+      }
+    ]
+  })
+}
 
 resource "aws_iam_role_policy_attachment" "lambda_xray_write" {
-  role       = aws_iam_role.lambda.name           # ← the role you already have
+  role       = aws_iam_role.lambda.name
   policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
+resource "aws_iam_role_policy" "lambda_feature_store_policy" {
+  name = "lambda-feature-store-access"
+  role = aws_iam_role.lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "sagemaker:GetRecord"
+        ]
+        Resource = var.feature_group_arn
+      }
+    ]
+  })
 }

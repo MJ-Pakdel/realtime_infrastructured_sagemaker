@@ -55,3 +55,16 @@ output "latency_tester_instance_id" {
   description = "Instance ID of the latency‑tester EC2"
   value       = module.tester_ec2.instance_id
 }
+
+
+output "feature_group_name" {
+  value = module.feature_store.feature_group_name
+}
+output "feature_group_arn"  {
+  value = module.feature_store.feature_group_arn
+}
+
+output "offline_prefix" {
+  description = "S3 prefix for Feature Store offline data"
+  value       = "feature-store/"   # keep the trailing slash
+}
