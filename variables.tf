@@ -58,6 +58,12 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets"
+  type        = list(string)
+  default     = ["10.0.0.0/24"]
+}
+
 # SageMaker configuration
 variable "instance_type" {
   description = "Instance type for SageMaker (e.g., ml.t2.medium)"
@@ -89,4 +95,20 @@ variable "account_id" {
   description = "AWS account ID for resource ARNs"
   type        = string
   default     = "988182270763" # Replace with your actual account ID or use data source in main.tf
+}
+
+
+######################################################
+#  Latency‑tester EC2 extras
+######################################################
+
+variable "ssh_key_name" {
+  description = "Existing EC2 key‑pair name for SSH access (blank to skip SSH)"
+  type        = string
+  default     = ""         # fill in e.g. "my‑laptop‑key" if you use SSH
+}
+
+variable "my_ip_cidr" {
+  description = "Your laptop's public IP in CIDR form, e.g. 198.51.100.42/32"
+  type        = string
 }

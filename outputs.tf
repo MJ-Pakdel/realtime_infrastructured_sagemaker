@@ -41,3 +41,17 @@ output "security_group_id" {
   description = "ID of the default security group for internal access"
   value       = module.network.default_security_group_id
 }
+
+######################################################
+#  EC2 latency‑tester outputs
+######################################################
+
+output "latency_tester_public_ip" {
+  description = "Public IP address of the latency‑tester EC2 instance"
+  value       = module.tester_ec2.public_ip
+}
+
+output "latency_tester_instance_id" {
+  description = "Instance ID of the latency‑tester EC2"
+  value       = module.tester_ec2.instance_id
+}

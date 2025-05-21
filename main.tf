@@ -18,6 +18,7 @@ module "network" {
   source               = "./modules/network"
   vpc_cidr             = var.vpc_cidr
   private_subnet_cidrs = var.private_subnet_cidrs
+  public_subnet_cidrs  = var.public_subnet_cidrs
   name_prefix          = var.name_prefix
   tags                 = var.tags
 }
@@ -82,4 +83,36 @@ module "sagemaker" {
 
   # Wait for all network resources (VPC endpoints) to be ready
   depends_on = [module.network]
+}
+
+# Allow EC2 to register with Systems Manager
+resource "aws_iam_role" "latency_ssm" {
+  name = "latency-tester-ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = { Service = "ec2.amazonaws.com" },
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "latency_ssm_core" {
+  role       = aws_iam_role.latency_ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "latency" {
+  name = "latency-tester-ssm-profile"
+  role = aws_iam_role.latency_ssm.name
+}
+
+module "tester_ec2" {
+  source                 = "./modules/ec2"
+  subnet_id              = module.network.public_subnet_ids[0]
+  vpc_security_group_ids = [module.network.default_security_group_id]
+  key_name               = ""  # no SSH key needed with SSM
+  iam_instance_profile   = aws_iam_instance_profile.latency.name
 }
