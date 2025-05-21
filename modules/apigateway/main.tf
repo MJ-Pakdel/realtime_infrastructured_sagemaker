@@ -11,6 +11,14 @@ data "aws_region" "current" {}
 resource "aws_apigatewayv2_api" "api" {
   name          = "${var.name_prefix}-api"
   protocol_type = "HTTP"
+  
+  # Enable X-Ray tracing at the API level
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["*"]
+    allow_headers = ["*"]
+  }
+  
   tags = merge(
     { Name = "${var.name_prefix}-api" },
     var.tags

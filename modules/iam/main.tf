@@ -92,3 +92,9 @@ resource "aws_iam_role_policy" "sagemaker_s3_access" {
     ]
   })
 }
+
+
+resource "aws_iam_role_policy_attachment" "lambda_xray_write" {
+  role       = aws_iam_role.lambda.name           # ← the role you already have
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}

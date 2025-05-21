@@ -21,6 +21,11 @@ resource "aws_lambda_function" "this" {
   image_uri     = var.lambda_image_uri
   memory_size   = var.lambda_memory
   timeout       = var.lambda_timeout
+  
+  tracing_config {
+    mode = "Active"
+  }
+  
   # Deploy Lambda inside our VPC for access to internal services
   vpc_config {
     subnet_ids         = var.subnet_ids
@@ -35,7 +40,10 @@ resource "aws_lambda_function" "this" {
   }
   
   tags = merge(
-    { Name = "${var.name_prefix}-lambda" },
+    { 
+      Name = "${var.name_prefix}-lambda",
+      Version = "1.0.1"
+    },
     var.tags
   )
 }
