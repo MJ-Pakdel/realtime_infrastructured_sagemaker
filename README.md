@@ -66,39 +66,35 @@ import subprocess, sys, requests, time, numpy as np
 import os
 import argparse
 
+# ── helper to discover the API Gateway invoke URL ──────────────────
 def get_api_url():
-    parser = argparse.ArgumentParser(description='Test API Gateway latency')
-    parser.add_argument('--url', help='API Gateway URL to test')
-    args = parser.parse_args()
-    
-    if args.url:
+    parser = argparse.ArgumentParser(description="Test API Gateway latency")
+    parser.add_argument("--url", help="API Gateway URL to test")
+    args, _ = parser.parse_known_args()
+
+    if args.url:                                   # 1. CLI
         return args.url.rstrip("/") + "/"
-        
-    url = os.environ.get('API_GATEWAY_URL')
-    if url:
-        return url.rstrip("/") + "/"
-        
-    try:
-        raw = subprocess.check_output(
-            ["terraform", "output", "-raw", "api_gateway_url"],
-            stderr=subprocess.STDOUT
-        )
-        return raw.decode().strip().rstrip("/") + "/"
-    except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        print("❌ Error: No API Gateway URL provided", file=sys.stderr)
-        print("Please provide the URL via --url argument or API_GATEWAY_URL environment variable", file=sys.stderr)
-        sys.exit(1)
+    if (u := os.environ.get("API_GATEWAY_URL")):   # 2. env var
+        return u.rstrip("/") + "/"
 
-def measure_latency(url, features, n_requests=100, warmup=50):
-    session = requests.Session()
-    payload = {"features": features}
+    # 3. Terraform output
+    raw = subprocess.check_output(
+        ["terraform", "output", "-raw", "api_gateway_url"],
+        stderr=subprocess.STDOUT,
+    )
+    return raw.decode().strip().rstrip("/") + "/"
 
-    print(f"Warming up with {warmup} requests...")
-    for _ in range(warmup):
+# ── latency tester — now takes user_id only ────────────────────────
+def measure_latency(url, user_id, n_requests=100, warmup=50):
+    session = requests.Session()        # re‑use TCP connection
+    payload = {"user_id": user_id}
+
+    print(f"Warming up with {warmup} requests …")
+    for _ in range(warmup):             # warm‑up (untimed)
         session.post(url, json=payload)
 
-    print(f"\nMeasuring latency over {n_requests} requests...")
     latencies = []
+    print(f"\nMeasuring latency over {n_requests} requests …")
     for i in range(n_requests):
         start = time.perf_counter()
         r = session.post(url, json=payload)
@@ -111,13 +107,16 @@ def measure_latency(url, features, n_requests=100, warmup=50):
     print("\n")
 
     for p in (10, 50, 90, 95, 99):
-        print(f"P{p}: {np.percentile(latencies, p):.2f} ms")
+        print(f"P{p}: {np.percentile(latencies, p):.2f} ms")
 
+# ── entry‑point ────────────────────────────────────────────────────
 if __name__ == "__main__":
-    api = get_api_url()
-    print("Testing API Gateway:", api)
-    test_features = [0.5, -1.2, 3.3, 0.0, 2.1, -0.7, 4.4, 5.5]
-    measure_latency(api, test_features, n_requests=100)
+    api_url = get_api_url()
+    print("Testing API Gateway:", api_url)
+
+    test_user_id = 7            # one of the 50 rows you seeded
+    measure_latency(api_url, test_user_id, n_requests=100)
+
 EOF
 ```
 

@@ -50,10 +50,14 @@ module "lambda" {
   lambda_memory     = var.lambda_memory
   lambda_timeout    = var.lambda_timeout
   lambda_image_uri  = var.lambda_image_uri
-  subnet_ids        = module.network.private_subnet_ids
-  security_group_id = module.network.default_security_group_id
+  # subnet_ids        = module.network.private_subnet_ids
+  # security_group_id = module.network.default_security_group_id
   lambda_role_arn   = module.iam.lambda_role_arn
   tags              = var.tags
+
+  # Environment variables
+  sagemaker_endpoint_name = "${var.name_prefix}-endpoint"
+  feature_group_name      = module.feature_store.feature_group_name
 
   # Ensure ECR repository is created before Lambda (which depends on an image being pushed)
   depends_on = [module.ecr]

@@ -25,11 +25,11 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Attach AWS Lambda VPC access policy (for ENI creation in VPC)
-resource "aws_iam_role_policy_attachment" "lambda_vpc" {
-  role       = aws_iam_role.lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
+# # Attach AWS Lambda VPC access policy (for ENI creation in VPC)
+# resource "aws_iam_role_policy_attachment" "lambda_vpc" {
+#   role       = aws_iam_role.lambda.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+# }
 
 # Inline policy to allow Lambda to invoke SageMaker endpoint
 # Terraform AWS IAM Role Policy resource: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy

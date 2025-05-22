@@ -26,16 +26,17 @@ resource "aws_lambda_function" "this" {
     mode = "Active"
   }
   
-  # Deploy Lambda inside our VPC for access to internal services
-  vpc_config {
-    subnet_ids         = var.subnet_ids
-    security_group_ids = [var.security_group_id]
-  }
+  # # Deploy Lambda inside our VPC for access to internal services
+  # vpc_config {
+  #   subnet_ids         = var.subnet_ids
+  #   security_group_ids = [var.security_group_id]
+  # }
   
-  # Add environment variable for SageMaker endpoint name
+  # Add environment variables for SageMaker endpoint and Feature Store
   environment {
     variables = {
-      SAGEMAKER_ENDPOINT = "${var.name_prefix}-endpoint"
+      SAGEMAKER_ENDPOINT = var.sagemaker_endpoint_name
+      SM_FEATURE_GROUP  = var.feature_group_name
     }
   }
   

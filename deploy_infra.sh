@@ -56,11 +56,17 @@ echo ""
 echo "📋 Infrastructure outputs:"
 terraform output
 
-# 8. Extract important endpoints
+# 9. Push synthetic data to Feature Store
+echo ""
+echo "🔄 Pushing synthetic data to Feature Store..."
+python scripts/push_to_feature_store.py
+echo "✅ Feature Store data ingestion complete!"
+
+# 10. Extract important endpoints
+echo ""
 API_URL=$(terraform output -raw api_gateway_url 2>/dev/null || echo "API not yet deployed")
 SAGEMAKER_ENDPOINT=$(terraform output -raw sagemaker_endpoint_name 2>/dev/null || echo "SageMaker endpoint not yet deployed")
 
-echo ""
 echo "🔗 API Gateway URL: $API_URL"
 echo "🧠 SageMaker Endpoint: $SAGEMAKER_ENDPOINT"
 echo ""
